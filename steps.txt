@@ -1,0 +1,270 @@
+	dotnet new sln 
+	dotnet new webapi -n API
+	
+	dotnet sln add API/
+	
+	* comment //app.UseHttpsRedirection(); in API\Startup.cs
+	* remove https://localhost:5001; from API\Properties\launchSettings.json
+	
+	* Add NuGet package to Persistence project
+		Microsoft.EntityFrameworkCore
+		Microsoft.EntityFrameworkCore.Sqlite
+		Microsoft.EntityFrameworkCore.Design
+
+
+    Add entry in data context calss
+    > create Data\DataContext.cs
+    > public DbSet<Comment> Comments { get; set; }
+
+	Add entry in API\Startup.cs
+	services.AddDbContext<DataContext>(opt => 
+	{
+		opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
+	});
+	
+
+	Add ConnectionStrings in AppLogic\API\appsettings.json
+
+    > dotnet tool install --global dotnet-ef 
+    > dotnet ef 
+	
+	Add EF migration
+	dotnet tool install --global dotnet-ef
+	dotnet ef 
+	cd..
+	dotnet ef migrations add InitialCreate -p API/ -s API/ 
+	this will create migration files in \Persistence\Migrations
+	
+	Add following code in to run migration when appcation runs
+
+    in API\Program.cs
+    replace 
+     CreateHostBuilder(args).Build().Run();
+    with 
+
+    ===============================================================
+        var host = CreateHostBuilder(args).Build();
+            
+        using (var scope = host.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            try 
+            
+            {
+                var context = services.GetRequiredService<DataContext>();
+                context.Database.Migrate();
+                Seed.SeedData(context);
+            }
+            catch (Exception ex)
+            {
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "An error occured during migration");
+            }
+        }
+
+        host.Run();
+    ===============================================================
+
+   
+	dotnet watch run
+	This will create table
+
+	Create Seed data in OnModelCreating in AppLogic\Persistence\DataContext.cs
+	cd..
+	to run seed  run migration
+	dotnet ef migrations add SeedData -p API/ -s API/
+	
+	* Add CORS support in API in API\Startup.cs
+    ===============================================================
+		in ConfigureServices
+			services.AddCors(opt => 
+            {
+                opt.AddPolicy("CorsPolicy", policy => 
+                {
+                    policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000").AllowCredentials();
+                });
+            });
+
+        ---------------------------------
+		in Configure method
+		 app.UseCors("CorsPolicy");
+
+===============================================================         
+
+* Configure Mediatr 
+	https://www.udemy.com/course/complete-guide-to-building-an-app-with-net-core-and-react/learn/lecture/15865570
+	Add Nuget package to Application project
+		MediatR.Extensions.Microsoft.DependencyInjection
+	in API\Startup.cs add 
+	services.AddMediatR(typeof(List.Handler).Assembly);
+
+* FluentValidation
+	* Add Nuget package to Application project
+		FluentValidation.AspNetCore
+
+	* create class 
+		API\Errors\RestException.cs
+
+	* Error handling Middleware 
+		API\Middleware\ErrorHandlingMiddleware.cs
+		https://www.udemy.com/course/complete-guide-to-building-an-app-with-net-core-and-react/learn/lecture/15865854
+
+	* Add in Startup.cs > Configure
+		 app.UseMiddleware<ErrorHandlingMiddleware>()
+		 and comment //app.UseDeveloperExceptionPage();
+
+
+	https://www.udemy.com/course/complete-guide-to-building-an-app-with-net-core-and-react/learn/lecture/15865932
+
+
+* Create  Class API\Data\AppUser.cs
+
+
+* identity
+	Add Nuget package to Domain project
+		Microsoft.AspNetCore.Identity.EntityFrameworkCore
+	Persistence\DataContext.cs
+		* impliment IdentityDbContext<AppUser>
+
+		* base.OnModelCreating(builder);
+	Add migration
+		dotnet ef migrations add "AddedIdentity" -p API/ -s API/
+	Add Nuget package to API project 
+		Microsoft.AspNetCore.Identity.UI
+	Add in API\Startup.cs
+	===============================================================
+		var builder = services.AddIdentityCore<AppUser>();
+		var identityBuilder = new IdentityBuilder(builder.UserType, builder.Services);
+		identityBuilder.AddEntityFrameworkStores<DataContext>();
+		identityBuilder.AddSignInManager<SignInManager<AppUser>>();
+		services.AddAuthentication();
+	===============================================================
+
+	In API\Program.cs
+	===============================================================
+		try                
+		{
+			var context = services.GetRequiredService<DataContext>();
+			var userManager = services.GetRequiredService<UserManager<AppUser>>();
+			context.Database.Migrate();
+			context.Database.Migrate();
+			Seed.SeedData(context, userManager).Wait();
+		}
+		catch (Exception ex)
+		{
+			var logger = services.GetRequiredService<ILogger<Program>>();
+			logger.LogError(ex, "An error occured during migration");
+		}		
+	===============================================================
+
+		Create Application\User\Login.cs 
+
+		Create API\Controllers\BaseController.cs
+
+		* IJwtGenerator
+			* Add Nuget package to Infrastructure project
+				System.IdentityModel.Tokens.Jwt
+
+			* Create Interfece 
+				API\Interfaces\IJwtGenerator.cs
+				API\Interfaces\IUserAccessor.cs
+
+			* Create class
+				API\Security\JwtGenerator.cs
+				API\Security\UserAccessor.cs
+				https://www.udemy.com/course/complete-guide-to-building-an-app-with-net-core-and-react/learn/lecture/15865976#announcements
+		
+			* Add in API\Startup.cs
+				services.AddScoped<IJwtGenerator, JwtGenerator>();
+
+			* Add package
+				Microsoft.AspNetCore.Authentication.JwtBearer
+
+			* User Secrets 
+				> dotnet user-secrets  
+				> dotnet user-secrets init -p API/ 
+				> dotnet user-secrets set "TokenKey" "MyKey123”  -p API/  
+				> dotnet user-secrets list -p API/  
+
+			* add in API\Startup.cs
+			===============================================================
+			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenKey"]));
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+              .AddJwtBearer(opt =>
+              {
+                  opt.TokenValidationParameters = new TokenValidationParameters
+                  {
+                      ValidateIssuerSigningKey = true,
+                      IssuerSigningKey = key,
+                      ValidateAudience = false,
+                      ValidateIssuer = false
+                  };
+
+              });
+			===============================================================
+
+			* add "app.UseAuthentication();" in following order in Startup.cs
+			https://www.udemy.com/course/complete-guide-to-building-an-app-with-net-core-and-react/learn/lecture/15865984
+			===============================================================
+				   	app.UseRouting();
+					app.UseCors("CorsPolicy");
+					app.UseAuthentication();
+					app.UseAuthorization();
+			===============================================================
+
+			*
+
+			* Add user roles
+				API\Startup.cs > identityBuilder.AddRoles<IdentityRole>();
+				Persistence\Seed.cs > CreateRoles(
+
+
+	* AutoMapper
+		AutoMapper.Extensions.Microsoft.DependencyInjection
+
+	* Lazy loading
+	https://www.udemy.com/course/complete-guide-to-building-an-app-with-net-core-and-react/learn/lecture/15866112
+		without Lazy loading
+		===============================================================
+				var catalogs = await _context.Catalogs
+						.Include(x => x.Supplier)
+						.ThenInclude(..)
+		===============================================================					 
+		* Add package 
+			Microsoft.EntityFrameworkCore.Proxies same version of Microsoft.AspNetCore.Identity.EntityFrameworkCore
+
+		* add in API\Startup.cs
+		===============================================================
+		services.AddDbContext<DataContext>(opt =>
+            {
+                opt.UseLazyLoadingProxies();
+		===============================================================
+
+		* use virtual key
+			public virtual AppUser Supplier { get; set; }
+
+2. Create react project
+
+npx create-react-app client-app --use-npm --typescript 
+
+install axios
+npm install axios
+
+semantic-ui-react
+npm install semantic-ui-react
+
+add in client-app\public\index.html
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css" />
+
+
+npm start
+
+client-app\public\index.html
+change title => <title>React App</title> 
+
+
+1. create controller : client-app\src\features\Page\PageItemCategory\PageItemCategoryList.tsx
+2. create PageStore client-app\src\app\store\pageStore.ts
+3. Add entry in client-app\src\app\store\rootStore.ts
+4. Create Interfece
+4. Create entry in client-app\src\app\api\agent.ts
