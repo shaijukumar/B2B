@@ -49,7 +49,7 @@ namespace API.Features.Catlog
                         .Where(c => c.Supplier.UserName == supplier.UserName)
                         .ToListAsync();
 
-                    return _mapper.Map<List<Catalog>, List<CatlogDto>>(catalogs);
+                    return _mapper.Map<List<Catalog>, List<CatlogDto>>(catalogs); 
                 }
             }
         }

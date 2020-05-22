@@ -2,7 +2,7 @@ EF
 ===============================
 > dotnet tool install --global dotnet-ef 
 > dotnet ef 
-> dotnet ef migrations add CatalogUpdate -p API/ -s API/ 
+> dotnet ef migrations add IconUpdate -p API/ -s API/ 
 > dotnet ef migrations add PageIsUniqueKeyAdded -p Persistence/ -s API/ 
 > drop database 
 > dotnet ef  database drop -p Persistence/ -s API/ 

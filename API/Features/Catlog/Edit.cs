@@ -7,6 +7,7 @@ using API.Errors;
 using API.Interfaces;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Features.Catlog
 {
@@ -17,6 +18,7 @@ namespace API.Features.Catlog
             public Guid Id { get; set; }
             public string DisplayName { get; set; }
             public string Description { get; set; }
+            public Guid CategoryId { get; set; }
         }
 
         public class CommandValidator : AbstractValidator<Command>
@@ -24,6 +26,7 @@ namespace API.Features.Catlog
             public CommandValidator()
             {
                 RuleFor(x => x.DisplayName).NotEmpty();
+                RuleFor(x => x.CategoryId).NotEmpty();
             }
 
             private object RRuleFor(Func<object, object> p)
@@ -53,6 +56,15 @@ namespace API.Features.Catlog
 
                 if (CurrentUsername.ToLower().ToString() == "admin" || catalog.Supplier.UserName == CurrentUsername)
                 {
+
+                    var category = await _context.Categories.SingleOrDefaultAsync(x =>
+                    x.Id == request.CategoryId);
+
+                    if (category != null)
+                    {
+                        catalog.Category = category;
+                    }
+
                     catalog.DisplayName = request.DisplayName ?? catalog.DisplayName;
                     catalog.Description = request.Description ?? catalog.Description;
 

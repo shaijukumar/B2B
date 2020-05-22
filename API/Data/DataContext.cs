@@ -10,9 +10,17 @@ namespace API.Data
         {
         }
 
+        public DbSet<UserPhoto> UserPhoto { get; set; }
+
+        public DbSet<CatalogPhoto> CatalogPhotos { get; set; }
+
         public DbSet<Value> Values { get; set; }
 
         public DbSet<Catalog> Catalogs { get; set; }
+        public DbSet<Category> Categories { get; set; }
+
+
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -25,7 +33,7 @@ namespace API.Data
                     new Value { Id = 3, Name = "Value 103" }
                 );
 
-            
+
 
         }
     }

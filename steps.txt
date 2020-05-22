@@ -31,7 +31,7 @@
 	Add EF migration
 	dotnet tool install --global dotnet-ef
 	dotnet ef 
-	cd..
+	cd.. 
 	dotnet ef migrations add InitialCreate -p API/ -s API/ 
 	this will create migration files in \Persistence\Migrations
 	
@@ -42,6 +42,7 @@
      CreateHostBuilder(args).Build().Run();
     with 
 
+	
     ===============================================================
         var host = CreateHostBuilder(args).Build();
             
@@ -243,6 +244,43 @@
 		* use virtual key
 			public virtual AppUser Supplier { get; set; }
 
+
+Photo upload 
+		* https://cloudinary.com/documentation/dotnet_integration  
+		* Create ac in https://cloudinary.com/
+		* store in user secrets		 
+		dotnet user-secrets set "Cloudinary:CloudName" "dzcblkurm" 
+		dotnet user-secrets set "Cloudinary:ApiKey" "464351479699118" 
+		dotnet user-secrets set "Cloudinary:ApiSecret" "mbRR57lK1erfhg2TQHHQ-o0b9Fs" 
+		to list all secrets : dotnet user-secrets list
+
+		* add Photos\CloudinarySettings.cs
+
+		* Add in API\Startup.cs
+			services.Configure<CloudinarySettings>(Configuration.GetSection("Cloudinary"));
+		* Add .net sdk
+			https://cloudinary.com/documentation/dotnet_integration#installation
+			add NuGet package CloudinaryDotNet
+
+		* add 
+			API\Interfaces\IPhotoAccessor.cs
+			API\Features\Photos\PhotoAccessor.cs
+			API\Features\Photos\PhotoAccessor.cs
+			
+			Add in API\Startup.cs
+			services.AddScoped<IPhotoAccessor, PhotoAccessor>();
+
+			API\Model\CatalogPhoto.cs
+			And add photo entry in ref class
+				public virtual ICollection<CatalogPhoto> Photos { get; set; }
+			add entry in API\Data\DataContext.cs
+				public DbSet<CatalogPhoto> CatalogPhotos { get; set; }
+
+			* Create handeler 
+				API\Features\Photos\AddUserPhoto.cs
+			
+
+
 2. Create react project
 
 npx create-react-app client-app --use-npm --typescript 
@@ -261,6 +299,10 @@ npm start
 
 client-app\public\index.html
 change title => <title>React App</title> 
+
+Mobx
+====
+npm install mobx mobx-react-lite
 
 
 1. create controller : client-app\src\features\Page\PageItemCategory\PageItemCategoryList.tsx

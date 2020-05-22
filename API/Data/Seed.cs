@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -44,6 +45,20 @@ namespace API.Data
                 {
                     await userManager.CreateAsync(user, "Pa$$w0rd");
                 }
+            }
+
+            if (!context.Categories.Any())
+            {
+                var cats = new List<Category>
+                 {
+                    new Category {Id = Guid.NewGuid(), Title = "Beauty" },
+                    new Category {Id = Guid.NewGuid(), Title = "Electronics"},
+                    new Category {Id = Guid.NewGuid(), Title = "Cloth" },
+                    new Category {Id = Guid.NewGuid(), Title = "Kitchen"}
+                 };
+
+                context.Categories.AddRange(cats);
+                context.SaveChanges();
             }
 
             // if (!context.Values.Any())

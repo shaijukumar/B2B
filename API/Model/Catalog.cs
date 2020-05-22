@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace API.Model
 {
@@ -7,6 +8,9 @@ namespace API.Model
         public Guid Id { get; set; }
         public string DisplayName { get; set; }
         public string Description { get; set; }
+        public float Price { get; set; }
+        public virtual Category Category { get; set; }
+        public virtual ICollection<CatalogPhoto> Photos { get; set; }
         public virtual AppUser Supplier { get; set; }
     }
-}
+} 

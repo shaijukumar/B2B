@@ -61,6 +61,9 @@ namespace API.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("PhotosId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("TEXT");
 
@@ -80,6 +83,8 @@ namespace API.Migrations
                         .IsUnique()
                         .HasName("UserNameIndex");
 
+                    b.HasIndex("PhotosId");
+
                     b.ToTable("AspNetUsers");
                 });
 
@@ -89,20 +94,79 @@ namespace API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("DisplayName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<float>("Price")
+                        .HasColumnType("REAL");
+
                     b.Property<string>("SupplierId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("Catalogs");
+                });
+
+            modelBuilder.Entity("API.Model.CatalogPhoto", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("CatalogId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsMain")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CatalogId");
+
+                    b.ToTable("CatalogPhotos");
+                });
+
+            modelBuilder.Entity("API.Model.Category", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("icon")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("SupplierId");
+                    b.ToTable("Categories");
+                });
 
-                    b.ToTable("Catalogs");
+            modelBuilder.Entity("API.Model.UserPhoto", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserPhoto");
                 });
 
             modelBuilder.Entity("API.Model.Value", b =>
@@ -264,11 +328,29 @@ namespace API.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("API.Model.AppUser", b =>
+                {
+                    b.HasOne("API.Model.UserPhoto", "Photos")
+                        .WithMany()
+                        .HasForeignKey("PhotosId");
+                });
+
             modelBuilder.Entity("API.Model.Catalog", b =>
                 {
+                    b.HasOne("API.Model.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId");
+
                     b.HasOne("API.Model.AppUser", "Supplier")
                         .WithMany()
                         .HasForeignKey("SupplierId");
+                });
+
+            modelBuilder.Entity("API.Model.CatalogPhoto", b =>
+                {
+                    b.HasOne("API.Model.Catalog", null)
+                        .WithMany("Photos")
+                        .HasForeignKey("CatalogId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

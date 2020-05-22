@@ -19,6 +19,9 @@ namespace API.Features.Catlog
             public Guid Id { get; set; }
             public string DisplayName { get; set; }
             public string Description { get; set; }
+
+            public float Price { get; set; }
+            public Guid CategoryId { get; set; }
         }
 
         public class CommandValidator : AbstractValidator<Command>
@@ -26,6 +29,8 @@ namespace API.Features.Catlog
             public CommandValidator()
             {
                 RuleFor(x => x.DisplayName).NotEmpty();
+                RuleFor(x => x.CategoryId).NotEmpty();
+                RuleFor(x => x.Price).NotEmpty();
             }
         }
 
@@ -45,12 +50,19 @@ namespace API.Features.Catlog
                 var supplier = await _context.Users.SingleOrDefaultAsync(x =>
                     x.UserName == _userAccessor.GetCurrentUsername());
 
+                var category = await _context.Categories.SingleOrDefaultAsync(x =>
+                    x.Id == request.CategoryId);
+
+                //CategoryId
+
                 var catalog = new Catalog
                 {
                     Id = request.Id,
                     DisplayName = request.DisplayName,
                     Description = request.Description,
-                    Supplier = supplier
+                    Supplier = supplier,
+                    Category = category,
+                    Price = request.Price
                 };
 
                 _context.Catalogs.Add(catalog);
