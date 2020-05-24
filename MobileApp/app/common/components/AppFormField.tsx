@@ -1,7 +1,7 @@
 import React from "react";
 import { useFormikContext } from "formik";
 
-import AppText from "../components/AppText"
+import AppText from "./AppText"
 import ErrorMessage from "./ErrorMessage";
 import AppTextInput from "./AppTextInput";
 

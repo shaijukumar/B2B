@@ -1,7 +1,7 @@
 import React from "react";
 import { useFormikContext } from "formik";
 
-import Button from "../components/AppButton";
+import Button from "./AppButton";
 
 
 const SubmitButton: React.FC<{ title: string }> = ({ title }) => {

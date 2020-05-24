@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet } from "react-native";
 
-import AppText from "../components/AppText";
+import AppText from "./AppText";
 import { useFormikContext } from "formik";
 
 const ErrorMessage: React.FC<{

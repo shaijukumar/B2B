@@ -1,7 +1,7 @@
 import React from "react";
 import { useFormikContext } from "formik";
 
-import AppPicker from "../components/AppPicker";
+import AppPicker from "./AppPicker";
 import ErrorMessage from "./ErrorMessage";
 
 //const AppFormPicker: React.FC<myProps> = ({ navigation }) => {

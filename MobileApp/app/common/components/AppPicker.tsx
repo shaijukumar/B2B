@@ -11,7 +11,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import AppText from "./AppText";
 import defaultStyles from "../../config/styles";
-import PickerItem from "../components/PickerItem";
+import PickerItem from "./PickerItem";
 import Screen from "./Screen";
 
 //function AppPicker({
