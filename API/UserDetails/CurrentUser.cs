@@ -5,7 +5,7 @@ using API.Interfaces;
 using API.Model;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
- 
+
 namespace API.UserDetails
 {
     public class CurrentUser
@@ -26,16 +26,16 @@ namespace API.UserDetails
 
             public async Task<User> Handle(Query request, CancellationToken cancellationToken)
             {
-                var user    = await _userManager.FindByNameAsync(_userAccessor.GetCurrentUsername());
+                var user = await _userManager.FindByNameAsync(_userAccessor.GetCurrentUsername());
                 //var roles   = await _userManager.GetRolesAsync(user);
-              
+
                 return new User
                 {
                     DisplayName = user.DisplayName,
-                    Username = user.UserName,   
-                    Email = user.Email,             
-                    //Token = _jwtGenerator.CreateToken(user),
-                    //Image = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
+                    Username = user.UserName,
+                    Email = user.Email,
+                    //Token = _jwtGenerator.CreateToken(user),                   
+                    Image = user.Photos.Url
                 };
             }
         }

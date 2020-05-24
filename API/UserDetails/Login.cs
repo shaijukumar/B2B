@@ -57,8 +57,9 @@ namespace API.UserDetails
                     {
                         DisplayName = user.DisplayName,
                         Token = _jwtGenerator.CreateToken(user),
-                        Username = user.UserName,
-                        Image = null
+                        Username = user.UserName,                        
+                        Email = user.Email,
+                        Image = user.Photos.Url
                     };
                 }
 
