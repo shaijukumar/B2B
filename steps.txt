@@ -304,7 +304,6 @@ Mobx
 ====
 npm install mobx mobx-react-lite
 
-
 1. create controller : client-app\src\features\Page\PageItemCategory\PageItemCategoryList.tsx
 2. create PageStore client-app\src\app\store\pageStore.ts
 3. Add entry in client-app\src\app\store\rootStore.ts
